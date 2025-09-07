@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Projects</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Projects</h1>
+  </header>
+
+  <main>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Required Skills</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Budget ($)</th>
+          <th>Status</th>
+          <th>Client</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projects.forEach(project => { %>
+          <tr>
+            <td><%= project.name %></td>
+            <td><%= project.description || "N/A" %></td>
+            <td><%= project.required_skills.join(", ") %></td>
+            <td><%= project.start_date.toDateString() %></td>
+            <td><%= project.end_date ? project.end_date.toDateString() : "Ongoing" %></td>
+            <td><%= project.budget %></td>
+            <td><%= project.status %></td>
+            <td><%= project.client_name || "Internal" %></td>
+            <td><%= project.location || "N/A" %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

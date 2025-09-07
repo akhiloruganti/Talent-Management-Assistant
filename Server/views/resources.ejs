@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resources</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Resources</h1>
+  </header>
+
+  <main>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Proficiency</th>
+          <th>Skills</th>
+          <th>Capacity (hrs/week)</th>
+          <th>Availability Start</th>
+          <th>Location</th>
+          <th>Rate/hr ($)</th>
+          <th>Current Project</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% resources.forEach(resource => { %>
+          <tr>
+            <td><%= resource.name %></td>
+            <td><%= resource.role %></td>
+            <td><%= resource.proficiency %></td>
+            <td><%= resource.skills.join(", ") %></td>
+            <td><%= resource.capacity_hours %></td>
+            <td><%= resource.availability_start.toDateString() %></td>
+            <td><%= resource.location || "N/A" %></td>
+            <td><%= resource.rate_per_hour %></td>
+            <td><%= resource.current_project ? resource.current_project.name : "None" %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
