@@ -790,40 +790,35 @@ class LLMService:
                     return proj
             return None
 
-        if user.strip().lower() in ("reload db", "reload", "refresh db"):
-            resources, projects = self.load_data_from_mongo()
-            state["resources"] = resources
-            state["projects"] = projects
-            state["ranked"] = []
-            state["pending_candidate"] = None
-            say(f"Reloaded {len(resources)} resources & {len(projects)} projects.")
-            return "\n".join(outputs)
-
         remember_user(user)
 
-        if not state["resources"] or not state["projects"]:
-            say("I don't see any resources/projects in Mongo yet. Please insert data and say `reload db`.")
-            return "\n".join(outputs)
-
-        inline_proj = self.detect_project_from_text(state["projects"], user)
-        if inline_proj and (not state["project"] or state["project"]["name"] != inline_proj["name"]):
-            set_project(inline_proj)
-
-        if self.has_confirm_intent(user):
+        if self.has_confirm_intent(user):  # Confirmation check
             proj = self.detect_project_from_text(state["projects"], user) or ensure_active_project()
+
             if not proj and state["pending_candidate"]:
                 proj_name = state["pending_candidate"]["project"]
                 proj = self._find_project(state["projects"], proj_name)
                 if proj:
                     set_project(proj)
+
             if proj:
-                confirmed = self.confirm_pending(state, proj)
-                if confirmed:
-                    say(f"✅ Confirmed: {proj['name']} → {confirmed['name']}\n{self.describe_resource(confirmed)}")
-                    say("Tell me another project when you're ready.")
-                else:
-                    say("I don't have a candidate pending for confirmation. Ask me for a suggestion first.")
-                return "\n".join(outputs)
+                # Find the resource selected for allocation
+                pick_res = state["pending_candidate"]["resource"]
+                if pick_res:
+                    # Call _insert_allocation_record to save to DB
+                    self._insert_allocation_record(proj, pick_res, self._base_score(proj, pick_res))
+                    
+                    # Confirm the allocation
+                    state["confirmed"].append({"project": proj["name"], "resource": pick_res["name"]})
+                    say(f"✅ Confirmed: {proj['name']} → {pick_res['name']}")
+                    state["pending_candidate"] = None
+                    state["ranked"] = []
+                    state["awaiting"] = False
+                    return "\n".join(outputs)
+
+            say("I don't have a candidate pending for confirmation. Please ask for a suggestion first.")
+            return "\n".join(outputs)
+
 
         if self.is_greeting(user):
             say("Hello! Share a project name and I’ll propose the best match. You can also add constraints like 'in Hyderabad' or 'lowest rate'.")
